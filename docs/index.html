@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Breach Simulation Platform Showcase</title>
+    <style>
+      :root {
+        --ink: #101820;
+        --panel: rgba(255, 255, 255, 0.08);
+        --line: rgba(255, 255, 255, 0.18);
+        --text: #eef6fb;
+        --muted: #a9bac7;
+        --blue: #39a7d8;
+        --amber: #f2aa4c;
+        --green: #5fd18b;
+        --red: #ff6b6b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 18% 10%, rgba(57, 167, 216, 0.26), transparent 30%),
+          radial-gradient(circle at 82% 12%, rgba(242, 170, 76, 0.2), transparent 26%),
+          linear-gradient(135deg, #081018 0%, #101820 48%, #122736 100%);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        animation: gridDrift 16s linear infinite;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 44px 44px;
+        content: "";
+        inset: 0;
+        mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent 85%);
+        pointer-events: none;
+        position: fixed;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        margin: 0 auto;
+        max-width: 1180px;
+        padding: 28px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .nav {
+        align-items: center;
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        margin-bottom: 76px;
+      }
+
+      .brand {
+        align-items: center;
+        display: flex;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: 0.02em;
+      }
+
+      .mark {
+        animation: pulse 2.4s ease-in-out infinite;
+        background: linear-gradient(135deg, var(--blue), var(--amber));
+        border-radius: 8px;
+        box-shadow: 0 0 32px rgba(57, 167, 216, 0.45);
+        height: 34px;
+        width: 34px;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .nav-links a,
+      .button {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--text);
+        padding: 10px 14px;
+        text-decoration: none;
+        transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+      }
+
+      .nav-links a:hover,
+      .button:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.36);
+        transform: translateY(-2px);
+      }
+
+      .hero {
+        display: grid;
+        gap: 36px;
+        grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+        min-height: 620px;
+      }
+
+      .eyebrow {
+        color: var(--amber);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        margin: 0 0 14px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(44px, 8vw, 88px);
+        line-height: 0.94;
+        margin: 0;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.7;
+        margin: 28px 0;
+        max-width: 680px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--blue), #2477a4);
+        border-color: transparent;
+        box-shadow: 0 16px 38px rgba(57, 167, 216, 0.26);
+      }
+
+      .terminal {
+        background: rgba(2, 8, 14, 0.72);
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 14px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.36);
+        overflow: hidden;
+      }
+
+      .terminal-bar {
+        align-items: center;
+        background: rgba(255,255,255,0.06);
+        display: flex;
+        gap: 7px;
+        padding: 14px;
+      }
+
+      .dot {
+        border-radius: 50%;
+        height: 11px;
+        width: 11px;
+      }
+
+      .dot.red { background: var(--red); }
+      .dot.amber { background: var(--amber); }
+      .dot.green { background: var(--green); }
+
+      .terminal pre {
+        color: #c9f7dd;
+        font-size: 15px;
+        line-height: 1.65;
+        margin: 0;
+        min-height: 310px;
+        overflow: auto;
+        padding: 22px;
+      }
+
+      .cursor::after {
+        animation: blink 1s steps(2, start) infinite;
+        content: "_";
+      }
+
+      .cards {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin: 34px 0 74px;
+      }
+
+      .card {
+        animation: liftIn 700ms ease forwards;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        min-height: 168px;
+        opacity: 0;
+        padding: 22px;
+        transform: translateY(18px);
+      }
+
+      .card span {
+        color: var(--amber);
+        display: block;
+        font-size: 30px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+
+      .card h2 {
+        font-size: 19px;
+        margin: 0 0 8px;
+      }
+
+      .card p {
+        color: var(--muted);
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      .section {
+        margin: 74px 0;
+      }
+
+      .section h2 {
+        font-size: clamp(30px, 5vw, 52px);
+        margin: 0 0 20px;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 18px;
+      }
+
+      .step {
+        align-items: center;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        display: grid;
+        gap: 18px;
+        grid-template-columns: 110px 1fr 150px;
+        padding: 18px;
+      }
+
+      .pill {
+        background: rgba(57, 167, 216, 0.16);
+        border: 1px solid rgba(57, 167, 216, 0.35);
+        border-radius: 999px;
+        color: #bdefff;
+        display: inline-flex;
+        justify-content: center;
+        padding: 8px 12px;
+      }
+
+      .status {
+        color: var(--green);
+        font-weight: 800;
+        text-align: right;
+      }
+
+      .footer {
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        justify-content: space-between;
+        padding: 28px 0 10px;
+      }
+
+      @keyframes blink {
+        50% { opacity: 0; }
+      }
+
+      @keyframes gridDrift {
+        from { transform: translate3d(0, 0, 0); }
+        to { transform: translate3d(44px, 44px, 0); }
+      }
+
+      @keyframes pulse {
+        50% { transform: scale(1.08); }
+      }
+
+      @keyframes liftIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .cards {
+          grid-template-columns: 1fr;
+        }
+
+        .nav,
+        .step {
+          align-items: stretch;
+          grid-template-columns: 1fr;
+        }
+
+        .nav {
+          flex-direction: column;
+        }
+
+        .status {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="nav">
+        <div class="brand"><span class="mark"></span> Breach Simulation Platform</div>
+        <div class="nav-links">
+          <a href="../README.md">README</a>
+          <a href="architecture.md">Architecture</a>
+          <a href="release.md">Release</a>
+          <a href="https://github.com/SarthakShrivastav-a/breach-sim-platform">GitHub</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Enterprise Alpha Cyber Range</p>
+          <h1>Simulate breaches without risking production.</h1>
+          <p class="lead">
+            Launch controlled exercises, generate telemetry, validate detections, preserve evidence,
+            and produce after-action reports from one local-first platform.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/SarthakShrivastav-a/breach-sim-platform">View Repo</a>
+            <a class="button" href="../README.md#quick-start">Quick Start</a>
+          </div>
+        </div>
+
+        <div class="terminal" aria-label="Animated platform terminal">
+          <div class="terminal-bar">
+            <span class="dot red"></span>
+            <span class="dot amber"></span>
+            <span class="dot green"></span>
+          </div>
+          <pre><code id="terminalText" class="cursor"></code></pre>
+        </div>
+      </section>
+
+      <section class="cards" aria-label="Platform highlights">
+        <article class="card">
+          <span>01</span>
+          <h2>Safe Execution</h2>
+          <p>Telemetry-only by default, with command and target allowlists enforced before execution.</p>
+        </article>
+        <article class="card">
+          <span>02</span>
+          <h2>Detection Proof</h2>
+          <p>Sigma-like rules correlate simulated telemetry into repeatable detection findings.</p>
+        </article>
+        <article class="card">
+          <span>03</span>
+          <h2>Evidence Chain</h2>
+          <p>Artifacts are hashed and every critical action is chained through audit records.</p>
+        </article>
+        <article class="card">
+          <span>04</span>
+          <h2>Operator Console</h2>
+          <p>A React UI gives analysts scenario, exercise, detection, evidence, and report views.</p>
+        </article>
+      </section>
+
+      <section class="section">
+        <p class="eyebrow">Exercise Flow</p>
+        <h2>From scenario to after-action report.</h2>
+        <div class="timeline">
+          <div class="step">
+            <span class="pill">SCN-001</span>
+            <strong>Load MITRE ATT&CK mapped YAML scenario.</strong>
+            <span class="status">READY</span>
+          </div>
+          <div class="step">
+            <span class="pill">Telemetry</span>
+            <strong>Generate controlled process event inside the allowed lab boundary.</strong>
+            <span class="status">CAPTURED</span>
+          </div>
+          <div class="step">
+            <span class="pill">DET-001</span>
+            <strong>Correlate telemetry against detection rule and create finding.</strong>
+            <span class="status">MATCHED</span>
+          </div>
+          <div class="step">
+            <span class="pill">Report</span>
+            <strong>Produce evidence metadata, audit chain, SIEM exports, and exercise summary.</strong>
+            <span class="status">PASSED</span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Authorized security simulation only.</span>
+        <span>FastAPI · React · Docker · OpenSearch · MinIO</span>
+      </footer>
+    </main>
+
+    <script>
+      const terminal = document.getElementById("terminalText");
+      const lines = [
+        "$ docker compose up --build",
+        "range: backend, frontend, postgres, redis, opensearch, minio online",
+        "$ curl -X POST /api/exercises -d '{\"scenario_id\":\"SCN-001\"}'",
+        "exercise.status = completed",
+        "detection.rule = DET-001",
+        "attack.coverage = T1003",
+        "report.status = passed",
+        "siem.exports = splunk_hec | qradar_leef | sentinel_json"
+      ];
+      let line = 0;
+      let char = 0;
+
+      function type() {
+        if (line >= lines.length) return;
+        terminal.textContent += lines[line][char] || "";
+        char += 1;
+        if (char > lines[line].length) {
+          terminal.textContent += "\n";
+          line += 1;
+          char = 0;
+        }
+        window.setTimeout(type, char === 0 ? 520 : 24);
+      }
+
+      document.querySelectorAll(".card").forEach((card, index) => {
+        card.style.animationDelay = `${index * 120}ms`;
+      });
+
+      type();
+    </script>
+  </body>
+</html>
