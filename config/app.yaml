@@ -1,0 +1,64 @@
+app:
+  name: "Breach Simulation Platform"
+  version: "0.1.0-enterprise-alpha"
+  api_prefix: "/api"
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+database:
+  url_env: "DATABASE_URL"
+  default_url: "sqlite+aiosqlite:///./data/breach_sim.db"
+
+redis:
+  url_env: "REDIS_URL"
+  default_url: "redis://localhost:6379/0"
+
+security:
+  attack_version: "19.0"
+  default_execution_mode: "telemetry-only"
+  allowed_commands:
+    - "echo"
+    - "hostname"
+    - "whoami"
+    - "date"
+    - "uname"
+    - "id"
+    - "printf"
+  allowed_lab_hosts:
+    - "127.0.0.1"
+    - "localhost"
+  allowed_lab_cidrs:
+    - "10.10.0.0/16"
+    - "172.28.0.0/16"
+  blocked_command_patterns:
+    - "rm "
+    - "del "
+    - "format"
+    - "shutdown"
+    - "reboot"
+    - "curl "
+    - "wget "
+    - "powershell"
+    - "Invoke-"
+
+integrations:
+  splunk:
+    enabled: false
+    hec_url_env: "SPLUNK_HEC_URL"
+    token_env: "SPLUNK_HEC_TOKEN"
+  sentinel:
+    enabled: false
+    workspace_id_env: "SENTINEL_WORKSPACE_ID"
+    shared_key_env: "SENTINEL_SHARED_KEY"
+  qradar:
+    enabled: false
+    leef_endpoint_env: "QRADAR_LEEF_ENDPOINT"
+  webhook:
+    enabled: false
+    url_env: "GENERIC_SOAR_WEBHOOK_URL"
+
+docker:
+  image_repository: ""
+  publish_enabled_env: "ENABLE_DOCKER_PUBLISH"
+
